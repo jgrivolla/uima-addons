@@ -414,14 +414,18 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
       throw new AnnotatorInitializationException();
     }
 
-    resultAnnotationType = typeSystem.getType(resultAnnotationName);
-    if (resultAnnotationType == null) {
-      logger.logError(PARAM_ANNOTATION_NAME + " '" + resultAnnotationName
-              + "' specified, but does not exist");
-      throw new AnnotatorInitializationException();
+    if ((resultAnnotationName == null) || (resultAnnotationName.equals(""))) {
+      resultAnnotationType = null;
+    } else {
+      resultAnnotationType = typeSystem.getType(resultAnnotationName);
+	  if (resultAnnotationType == null) {
+		logger.logError(PARAM_ANNOTATION_NAME + " '" + resultAnnotationName
+				+ "' specified, but does not exist");
+		throw new AnnotatorInitializationException();
+	  }
     }
 
-    if ((resultEnclosingSpanName == null) || (resultEnclosingSpanName.equals(""))) {
+    if ((resultEnclosingSpanName == null) || (resultEnclosingSpanName.equals("") || (resultAnnotationType == null))) {
       resultEnclosingSpan = null;
     } else {
       resultEnclosingSpan = resultAnnotationType.getFeatureByBaseName(resultEnclosingSpanName);
@@ -432,7 +436,7 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
       }
     }
 
-    if ((resultMatchedTextFeatureName == null) || (resultMatchedTextFeatureName.equals(""))) {
+    if ((resultMatchedTextFeatureName == null) || (resultMatchedTextFeatureName.equals("") || (resultAnnotationType == null))) {
       resultMatchedTextFeature = null;
     } else {
       resultMatchedTextFeature = resultAnnotationType
@@ -444,7 +448,7 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
       }
     }
 
-    if ((matchedTokensFeatureName == null) || (matchedTokensFeatureName.equals(""))) {
+    if ((matchedTokensFeatureName == null) || (matchedTokensFeatureName.equals("") || (resultAnnotationType == null))) {
       matchedTokensFeature = null;
     } else {
       matchedTokensFeature = resultAnnotationType.getFeatureByBaseName(matchedTokensFeatureName);
@@ -455,20 +459,22 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
       }
     }
 
-    int numFeatures = featureNames.length;
-    features = new Feature[numFeatures];
-
-    for (int i = 0; i < numFeatures; i++) {
-      features[i] = resultAnnotationType.getFeatureByBaseName(featureNames[i]);
-      if (features[i] == null) {
-        logger.logError(PARAM_FEATURE_LIST + "[" + i + "] '" + featureNames[i]
-                + "' specified, but does not exist for type: " + resultAnnotationType.getName());
-        // System.err.println (PARAM_FEATURE_LIST + "[" + i + "] '" +
-        // featureNames[i] + "' specified, but does not exist for type:
-        // " + resultAnnotationType.getName());
-        throw new AnnotatorInitializationException();
+    if (resultAnnotationType != null) {
+      int numFeatures = featureNames.length;
+      features = new Feature[numFeatures];
+      for (int i = 0; i < numFeatures; i++) {
+        features[i] = resultAnnotationType.getFeatureByBaseName(featureNames[i]);
+        if (features[i] == null) {
+          logger.logError(PARAM_FEATURE_LIST + "[" + i + "] '" + featureNames[i]
+                  + "' specified, but does not exist for type: " + resultAnnotationType.getName());
+          // System.err.println (PARAM_FEATURE_LIST + "[" + i + "] '" +
+          // featureNames[i] + "' specified, but does not exist for type:
+          // " + resultAnnotationType.getName());
+          throw new AnnotatorInitializationException();
+        }
       }
-
+    } else {
+      features = null;
     }
 
     try {
@@ -969,6 +975,7 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
   protected void makeAnnotation(CAS tcas, int start, int end, EntryProperties properties,
           Annotation spanAnnotation, String matchedText, Collection<AnnotationFS> matched,
           Logger log) {
+    if (resultAnnotationType == null) return; // skip if creating result annotation is disabled
     AnnotationFS annotation = tcas.createAnnotation(resultAnnotationType, start, end);
     if (resultEnclosingSpan != null) {
       annotation.setFeatureValue(resultEnclosingSpan, spanAnnotation);
