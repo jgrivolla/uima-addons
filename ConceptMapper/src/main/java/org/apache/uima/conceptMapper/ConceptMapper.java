@@ -215,7 +215,7 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
   /**
    * type of annotation that defines a block for processing, e.g. a sentence
    */
-  private static final String PARAM_DATA_BLOCK_FS = "SpanFeatureStructure";
+  public static final String PARAM_DATA_BLOCK_FS = "SpanFeatureStructure";
 
   private String spanFeatureStructureName;
 
@@ -227,7 +227,7 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
 
   private TypeSystem mLastTypeSystem;
 
-  private static final String PARAM_TOKENIZERDESCRIPTOR = "TokenizerDescriptorPath";
+  public static final String PARAM_TOKENIZERDESCRIPTOR = "TokenizerDescriptorPath";
 
   private static final String UNKNOWN_VALUE = "unknown";
 
@@ -253,7 +253,7 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
   public void initialize(UimaContext uimaContext) throws ResourceInitializationException {
     super.initialize(uimaContext);
 
-    // Process configration parameters
+    // Process configuration parameters
     try {
       // logger = new Logger (annotatorContext.getLogger ());
       logger = new Logger("ConceptMapper", uimaContext.getLogger());
